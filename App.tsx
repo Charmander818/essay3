@@ -18,14 +18,15 @@ const SESSION_KEY_AUTH = 'cie_econ_auth_session';
 const APP_PASSWORD = "kittymoni"; 
 
 const App: React.FC = () => {
-  // --- Authentication State ---
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return sessionStorage.getItem(SESSION_KEY_AUTH) === 'true';
   });
   const [passwordInput, setPasswordInput] = useState("");
   const [authError, setAuthError] = useState("");
 
-  // --- Application State ---
+  // Mobile Sidebar State
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const [customQuestions, setCustomQuestions] = useState<Question[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEY_CUSTOM_QUESTIONS);
     return saved ? JSON.parse(saved) : [];
@@ -51,7 +52,6 @@ const App: React.FC = () => {
   const [isBatchProcessing, setIsBatchProcessing] = useState(false);
   const [batchProgress, setBatchProgress] = useState("");
 
-  // --- Effects ---
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_CUSTOM_QUESTIONS, JSON.stringify(customQuestions));
   }, [customQuestions]);
@@ -60,7 +60,6 @@ const App: React.FC = () => {
     localStorage.setItem(STORAGE_KEY_WORK, JSON.stringify(questionStates));
   }, [questionStates]);
 
-  // --- Handlers ---
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordInput === APP_PASSWORD) {
@@ -106,7 +105,6 @@ const App: React.FC = () => {
               return [...prev.filter(q => q.id !== question.id), question];
           });
       }
-
       if (selectedQuestion?.id === question.id) {
         setSelectedQuestion(question);
       }
@@ -277,7 +275,6 @@ const App: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  // --- Login Screen ---
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4">
@@ -289,62 +286,56 @@ const App: React.FC = () => {
             <h1 className="text-2xl font-bold text-slate-800">CIE Economics Master</h1>
             <p className="text-slate-500 mt-2 text-sm">Protected Access</p>
           </div>
-          
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase mb-1 tracking-wider">Password</label>
-              <input 
-                type="password" 
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-                className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                placeholder="Enter access code"
-                autoFocus
-              />
+              <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" placeholder="Enter access code" autoFocus />
             </div>
-            
-            {authError && (
-              <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded border border-red-100">
-                {authError}
-              </div>
-            )}
-            
-            <button 
-              type="submit" 
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-all active:scale-[0.98]"
-            >
-              Unlock Access
-            </button>
+            {authError && <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded border border-red-100">{authError}</div>}
+            <button type="submit" className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-all active:scale-[0.98]">Unlock Access</button>
           </form>
-          
-          <p className="text-center mt-6 text-xs text-slate-400">
-            Authorized personnel only.
-          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
-      <Sidebar 
-        questions={allQuestions}
-        onSelectQuestion={setSelectedQuestion} 
-        selectedQuestionId={selectedQuestion?.id || null}
-        onAddQuestionClick={() => { setQuestionToEdit(null); setIsModalOpen(true); }}
-        onDeleteQuestion={handleDeleteQuestion}
-        onEditQuestion={(q) => { setQuestionToEdit(q); setIsModalOpen(true); }}
-        questionStates={questionStates}
-        onExportAll={handleExportAll}
-        onBatchGenerate={handleBatchGenerate}
-        isBatchProcessing={isBatchProcessing}
-        batchProgress={batchProgress}
-        onOpenCodeExport={() => setIsCodeExportOpen(true)}
-      />
+    <div className="flex h-screen overflow-hidden bg-slate-50 relative">
       
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+      {/* Mobile Header */}
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-slate-200 p-4 z-30 flex justify-between items-center shadow-sm">
+         <h1 className="text-lg font-bold text-slate-800">CIE Econ</h1>
+         <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+         </button>
+      </div>
+
+      {/* Sidebar Wrapper */}
+      <div className={`fixed inset-0 z-40 md:static md:z-auto transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+          <div className="absolute inset-0 bg-black/50 md:hidden" onClick={() => setIsSidebarOpen(false)}></div>
+          <div className="absolute left-0 top-0 bottom-0 w-80 md:w-80 bg-white shadow-xl md:shadow-none border-r border-slate-200 transform transition-transform duration-300 md:transform-none">
+             <Sidebar 
+                questions={allQuestions}
+                onSelectQuestion={(q) => { setSelectedQuestion(q); setIsSidebarOpen(false); }} 
+                selectedQuestionId={selectedQuestion?.id || null}
+                onAddQuestionClick={() => { setQuestionToEdit(null); setIsModalOpen(true); }}
+                onDeleteQuestion={handleDeleteQuestion}
+                onEditQuestion={(q) => { setQuestionToEdit(q); setIsModalOpen(true); }}
+                questionStates={questionStates}
+                onExportAll={handleExportAll}
+                onBatchGenerate={handleBatchGenerate}
+                isBatchProcessing={isBatchProcessing}
+                batchProgress={batchProgress}
+                onOpenCodeExport={() => setIsCodeExportOpen(true)}
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+              />
+          </div>
+      </div>
+
+      <main className="flex-1 flex flex-col h-screen overflow-hidden pt-16 md:pt-0">
         {/* Header */}
-        <header className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between flex-shrink-0 z-10">
+        <header className="hidden md:flex bg-white border-b border-slate-200 px-8 py-4 items-center justify-between flex-shrink-0 z-10">
           <div className="flex items-center gap-4">
             {selectedQuestion ? (
               <div>
@@ -374,9 +365,28 @@ const App: React.FC = () => {
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-8 custom-scroll">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scroll">
           {selectedQuestion ? (
             <>
+              {/* Mobile Mode Switcher */}
+              <div className="md:hidden mb-4 overflow-x-auto pb-2">
+                <div className="flex bg-slate-100 p-1 rounded-lg w-max">
+                  {Object.values(AppMode).map((m) => (
+                    <button
+                      key={m}
+                      onClick={() => setMode(m)}
+                      className={`px-3 py-2 rounded-md text-xs font-medium transition-all whitespace-nowrap ${
+                        mode === m 
+                          ? 'bg-white text-blue-700 shadow-sm' 
+                          : 'text-slate-600'
+                      }`}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {mode === AppMode.GENERATOR && (
                 <EssayGenerator 
                   question={selectedQuestion} 
