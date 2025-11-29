@@ -1,30 +1,42 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Sidebar from './components/Sidebar';
 import EssayGenerator from './components/EssayGenerator';
 import EssayGrader from './components/EssayGrader';
 import RealTimeWriter from './components/RealTimeWriter';
 import EssayImprover from './components/EssayImprover';
 import AddQuestionModal from './components/AddQuestionModal';
+import CodeExportModal from './components/CodeExportModal';
 import { Question, AppMode, QuestionState } from './types';
 import { questions as initialQuestions } from './data';
 import { generateModelAnswer, generateClozeExercise } from './services/geminiService';
 
-const STORAGE_KEY_QUESTIONS = 'cie_economics_questions_v1';
+const STORAGE_KEY_CUSTOM_QUESTIONS = 'cie_econ_custom_questions_v2';
 const STORAGE_KEY_WORK = 'cie_economics_work_v1';
 
 const App: React.FC = () => {
-  // Initialize questions from Local Storage or fall back to default data
-  const [allQuestions, setAllQuestions] = useState<Question[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY_QUESTIONS);
-    return saved ? JSON.parse(saved) : initialQuestions;
+  // Load custom questions from LocalStorage (Personal Local Data)
+  const [customQuestions, setCustomQuestions] = useState<Question[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY_CUSTOM_QUESTIONS);
+    return saved ? JSON.parse(saved) : [];
   });
+
+  // Combine static data.ts questions with local custom questions
+  // Use useMemo to ensure stability and efficiency
+  const allQuestions = useMemo(() => {
+    // If a custom question has the same ID as a static one (user promoted it to data.ts),
+    // prefer the static one to avoid duplicates, OR filter out the custom one.
+    // Here we filter out custom questions that clash with static IDs.
+    const staticIds = new Set(initialQuestions.map(q => q.id));
+    const uniqueCustom = customQuestions.filter(q => !staticIds.has(q.id));
+    return [...initialQuestions, ...uniqueCustom];
+  }, [customQuestions]);
 
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [mode, setMode] = useState<AppMode>(AppMode.GENERATOR);
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCodeExportOpen, setIsCodeExportOpen] = useState(false);
   const [questionToEdit, setQuestionToEdit] = useState<Question | null>(null);
   
   // Store state for each question
@@ -39,8 +51,8 @@ const App: React.FC = () => {
 
   // Persistence Effects
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY_QUESTIONS, JSON.stringify(allQuestions));
-  }, [allQuestions]);
+    localStorage.setItem(STORAGE_KEY_CUSTOM_QUESTIONS, JSON.stringify(customQuestions));
+  }, [customQuestions]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_WORK, JSON.stringify(questionStates));
@@ -72,12 +84,30 @@ const App: React.FC = () => {
 
   const handleSaveQuestion = (question: Question) => {
     if (questionToEdit) {
-      setAllQuestions(prev => prev.map(q => q.id === question.id ? question : q));
+      // If editing a custom question, update it in custom list
+      if (question.id.startsWith('custom-')) {
+          setCustomQuestions(prev => prev.map(q => q.id === question.id ? question : q));
+      } else {
+          // If editing a standard question... technically we can't 'save' this to data.ts from here.
+          // We'll effectively clone it into a custom question if we want to support it, 
+          // OR for now, just allow editing the in-memory version but warn it won't persist if not custom.
+          // Simplest approach: Treat it as a "local override" which we are storing in customQuestions for now
+          // assuming we handle ID collision.
+          // BUT for this specific request "add new question banks", we focus on adding.
+          // Let's just update the custom list.
+          alert("Note: You are editing a standard question locally. This change is saved in your browser but won't affect the official list unless exported.");
+          setCustomQuestions(prev => {
+              // Remove old if exists in custom, add new
+              return [...prev.filter(q => q.id !== question.id), question];
+          });
+      }
+
       if (selectedQuestion?.id === question.id) {
         setSelectedQuestion(question);
       }
     } else {
-      setAllQuestions(prev => [...prev, question]);
+      // Adding new
+      setCustomQuestions(prev => [...prev, question]);
       setSelectedQuestion(question);
     }
     setQuestionToEdit(null);
@@ -86,13 +116,11 @@ const App: React.FC = () => {
 
   const handleDeleteQuestion = (id: string) => {
     if (window.confirm("Are you sure you want to delete this question?")) {
-      setAllQuestions(prev => prev.filter(q => q.id !== id));
+      setCustomQuestions(prev => prev.filter(q => q.id !== id));
       if (selectedQuestion?.id === id) {
         setSelectedQuestion(null);
       }
-      const newStates = { ...questionStates };
-      delete newStates[id];
-      setQuestionStates(newStates);
+      // We don't delete the work state, in case they re-add it or it was a mistake
     }
   };
 
@@ -120,7 +148,12 @@ const App: React.FC = () => {
         count++;
         setBatchProgress(`${count} / ${total}`);
         
-        const state = questionStates[q.id] || {};
+        const state: QuestionState = questionStates[q.id] || {
+            generatorEssay: "",
+            graderEssay: "",
+            graderFeedback: "",
+            realTimeEssay: ""
+        };
         let essay = state.generatorEssay;
 
         // 1. Generate Essay if missing
@@ -177,7 +210,12 @@ const App: React.FC = () => {
     });
 
     sortedQuestions.forEach((q, index) => {
-        const state = questionStates[q.id] || {};
+        const state: QuestionState = questionStates[q.id] || {
+            generatorEssay: "",
+            graderEssay: "",
+            graderFeedback: "",
+            realTimeEssay: ""
+        };
         
         htmlBody += `
             <div style="margin-bottom: 30px; padding-bottom: 20px;">
@@ -190,8 +228,6 @@ const App: React.FC = () => {
 
         // Model Answer
         if (state.generatorEssay) {
-            // Convert simple markdown formatting to HTML for Word
-            // This replaces **text** with <strong>text</strong> and handles newlines
             let formattedEssay = state.generatorEssay
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\n\n/g, '<br/><br/>')
@@ -218,12 +254,10 @@ const App: React.FC = () => {
                 );
             });
             
-            // Format newlines
             clozeText = clozeText.replace(/\n/g, '<br/>');
             
             htmlBody += `<div style="font-family: Calibri, sans-serif; line-height:1.5;">${clozeText}</div>`;
             
-            // Answer Key
             htmlBody += `
                 <div style="margin-top:15px; background-color:#fffdf0; padding:10px; border:1px dashed #e6b800; font-family: Calibri, sans-serif;">
                     <strong>Answer Key:</strong><br/>
@@ -238,7 +272,6 @@ const App: React.FC = () => {
         htmlBody += `<br/><hr/></div>`;
     });
 
-    // Wrap in standard MS Word HTML structure
     const fullHtml = `
         <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
         <head>
@@ -252,12 +285,10 @@ const App: React.FC = () => {
         </html>
     `;
 
-    // Create a Blob with Word MIME type
     const blob = new Blob([fullHtml], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    // .doc extension triggers Word to open it
     link.download = `CIE_Economics_Master_Bank_${new Date().toISOString().slice(0,10)}.doc`;
     document.body.appendChild(link);
     link.click();
@@ -278,6 +309,7 @@ const App: React.FC = () => {
         onBatchGenerate={handleBatchGenerate}
         isBatchProcessing={isBatchProcessing}
         batchProgress={batchProgress}
+        onOpenCodeExport={() => setIsCodeExportOpen(true)}
       />
       
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
@@ -357,7 +389,7 @@ const App: React.FC = () => {
               </svg>
               <h3 className="text-xl font-semibold text-slate-600 mb-2">Welcome to Essay Master</h3>
               <p className="max-w-md text-center mb-6">Select a question from the syllabus topics on the left, or add your own question to start generating answers, grading essays, or practicing in real-time.</p>
-              <p className="text-sm text-slate-400">Your questions and essays are automatically saved.</p>
+              <p className="text-sm text-slate-400">Your questions and essays are automatically saved locally.</p>
             </div>
           )}
         </div>
@@ -368,6 +400,12 @@ const App: React.FC = () => {
         onClose={() => { setIsModalOpen(false); setQuestionToEdit(null); }} 
         onSave={handleSaveQuestion}
         initialQuestion={questionToEdit}
+      />
+
+      <CodeExportModal
+         isOpen={isCodeExportOpen}
+         onClose={() => setIsCodeExportOpen(false)}
+         customQuestions={customQuestions}
       />
     </div>
   );
