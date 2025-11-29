@@ -1,6 +1,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { Question, SyllabusTopic, QuestionState } from '../types';
+import { SYLLABUS_STRUCTURE, Level } from '../syllabusData';
 
 interface SidebarProps {
   questions: Question[];
@@ -34,14 +35,22 @@ const Sidebar: React.FC<SidebarProps> = ({
   batchProgress
 }) => {
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
+  // Default to AS Level
+  const [selectedLevel, setSelectedLevel] = useState<Level>('AS');
 
   // Group questions by topic, then by chapter
   const groupedQuestions = useMemo(() => {
-    // First filter the questions based on the selected mode
+    // 1. Determine valid topics for the current level (AS or A Level)
+    const validTopics = new Set(SYLLABUS_STRUCTURE[selectedLevel].topics);
+
+    // 2. Filter questions based on Mode AND Level
     const filtered = questions.filter(q => {
+      // Level Filter: Only show questions belonging to the selected level's topics
+      if (!validTopics.has(q.topic)) return false;
+
+      // View Mode Filter
       if (filterMode === 'saved') {
         const state = questionStates[q.id];
-        // Check if any work has been done
         return state && (
           (state.generatorEssay && state.generatorEssay.length > 0) || 
           (state.graderEssay && state.graderEssay.length > 0) || 
@@ -57,16 +66,16 @@ const Sidebar: React.FC<SidebarProps> = ({
 
     const groups: Record<string, Record<string, Question[]>> = {};
     
-    // Initialize topics in order from the Enum to preserve syllabus order
-    Object.values(SyllabusTopic).forEach(topic => {
+    // Initialize groups structure
+    SYLLABUS_STRUCTURE[selectedLevel].topics.forEach(topic => {
       groups[topic] = {};
     });
 
     filtered.forEach(q => {
-      // Ensure topic exists (handle edge case where data.ts might have a typo or new topic)
       if (!groups[q.topic]) groups[q.topic] = {};
       
-      const chapterKey = q.chapter || "General / Uncategorized";
+      // Default to "Uncategorized" if chapter matches nothing
+      const chapterKey = q.chapter || "General";
       
       if (!groups[q.topic][chapterKey]) {
           groups[q.topic][chapterKey] = [];
@@ -75,16 +84,39 @@ const Sidebar: React.FC<SidebarProps> = ({
     });
     
     return groups;
-  }, [questions, filterMode, questionStates]);
+  }, [questions, filterMode, questionStates, selectedLevel]);
+
+  // Helper: Sort chapters logically (e.g. 1.2 before 1.10)
+  const getSortedChapters = (chaptersObj: Record<string, Question[]>) => {
+    return Object.keys(chaptersObj).sort((a, b) => {
+      // Use numeric collation to handle 1.2 vs 1.10 correctly
+      return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+    });
+  };
+
+  // Helper: Get ordered topics
+  const orderedTopics = SYLLABUS_STRUCTURE[selectedLevel].topics;
+
+  // Helper: Count visible questions
+  const visibleCount = useMemo(() => {
+     let count = 0;
+     Object.values(groupedQuestions).forEach(chapters => {
+         Object.values(chapters).forEach(qs => count += qs.length);
+     });
+     return count;
+  }, [groupedQuestions]);
 
   return (
     <div className="w-80 bg-white border-r border-slate-200 h-screen flex flex-col">
-      <div className="p-5 border-b border-slate-100 bg-white z-20 flex-shrink-0">
-        <div className="flex justify-between items-center mb-4">
+      {/* Fixed Header Section */}
+      <div className="p-5 border-b border-slate-100 bg-white z-20 flex-shrink-0 space-y-4">
+        
+        {/* Title & Add Button */}
+        <div className="flex justify-between items-center">
           <div>
             <h1 className="text-lg font-bold text-slate-800 tracking-tight">CIE Econ Master</h1>
-            <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">
-               Total Questions: {questions.length}
+            <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">
+               Total Questions: <span className="text-blue-600">{questions.length}</span>
             </p>
           </div>
           <button 
@@ -96,7 +128,32 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
-        {/* Filter Toolbar */}
+        {/* Level Switcher (Pill Style) */}
+        <div className="bg-slate-100 p-1 rounded-lg flex relative font-medium">
+           {/* Sliding background could be added here for effect, using simple conditional styles for now */}
+           <button
+             onClick={() => setSelectedLevel('AS')}
+             className={`flex-1 py-1.5 text-xs rounded-md transition-all duration-200 ${
+               selectedLevel === 'AS' 
+                 ? 'bg-white text-blue-700 shadow-sm font-bold' 
+                 : 'text-slate-500 hover:text-slate-700'
+             }`}
+           >
+             AS Level
+           </button>
+           <button
+             onClick={() => setSelectedLevel('A Level')}
+             className={`flex-1 py-1.5 text-xs rounded-md transition-all duration-200 ${
+               selectedLevel === 'A Level' 
+                 ? 'bg-white text-purple-700 shadow-sm font-bold' 
+                 : 'text-slate-500 hover:text-slate-700'
+             }`}
+           >
+             A Level
+           </button>
+        </div>
+
+        {/* Filter Tabs */}
         <div className="flex bg-slate-100 p-1 rounded-lg grid grid-cols-3 gap-1">
           <button
             onClick={() => setFilterMode('all')}
@@ -105,7 +162,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                 ? 'bg-white text-blue-700 shadow-sm' 
                 : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
             }`}
-            title="Show All Questions"
           >
             All
           </button>
@@ -116,7 +172,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                 ? 'bg-white text-emerald-600 shadow-sm' 
                 : 'text-slate-500 hover:text-emerald-600 hover:bg-slate-200/50'
             }`}
-            title="Show My Saved Work"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
             Work
@@ -128,7 +183,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                 ? 'bg-white text-purple-600 shadow-sm' 
                 : 'text-slate-500 hover:text-purple-600 hover:bg-slate-200/50'
             }`}
-            title="Show My Custom Questions"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
             Added
@@ -136,25 +190,30 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
       
+      {/* Scrollable Questions List */}
       <div className="flex-1 overflow-y-auto custom-scroll py-2">
-        {Object.entries(groupedQuestions).map(([topic, chapters]) => {
-           // Only render topics that have questions after filtering
-           const hasQuestions = Object.values(chapters).some(arr => arr.length > 0);
-           if (!hasQuestions) return null;
+        {orderedTopics.map((topic) => {
+           const chapters = groupedQuestions[topic];
+           if (!chapters || Object.keys(chapters).length === 0) return null;
+
+           const sortedChapters = getSortedChapters(chapters);
 
            return (
             <div key={topic} className="mb-6 px-4">
-              <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 pl-1 sticky top-0 bg-white/95 backdrop-blur-sm py-1 z-10">
+              <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 pl-1 sticky top-0 bg-white/95 backdrop-blur-sm py-1 z-10 border-b border-transparent">
                 {topic}
               </h2>
               
-              {Object.entries(chapters).map(([chapter, topicQuestions]) => (
-                 topicQuestions.length > 0 && (
+              {sortedChapters.map((chapter) => {
+                 const topicQuestions = chapters[chapter];
+                 if (!topicQuestions || topicQuestions.length === 0) return null;
+
+                 return (
                   <div key={chapter} className="mb-4 pl-2 border-l-2 border-slate-100 ml-1 hover:border-slate-300 transition-colors">
-                    <h3 className="text-xs font-semibold text-slate-700 mb-2 truncate pl-2" title={chapter}>
+                    <h3 className="text-xs font-semibold text-slate-700 mb-2 truncate pl-2 pr-2 leading-tight select-none cursor-default" title={chapter}>
                       {chapter}
                     </h3>
-                    <div className="space-y-1 pl-1">
+                    <div className="space-y-2 pl-1">
                       {topicQuestions.map((q) => {
                         const hasSavedWork = questionStates[q.id] && (
                           (questionStates[q.id].generatorEssay && questionStates[q.id].generatorEssay.length > 0) || 
@@ -197,7 +256,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                             </button>
 
                             {/* Edit/Delete Actions - visible on hover */}
-                            <div className="absolute right-2 bottom-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-sm rounded-md p-1 shadow-sm border border-slate-100">
+                            <div className="absolute right-2 bottom-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-sm rounded-md p-1 shadow-sm border border-slate-100 pointer-events-none group-hover:pointer-events-auto">
                               <button 
                                 onClick={(e) => { e.stopPropagation(); onEditQuestion(q); }}
                                 className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
@@ -219,20 +278,21 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                   </div>
                  )
-              ))}
+              })}
             </div>
            );
         })}
         
-        {/* Empty State Message */}
-        {Object.keys(groupedQuestions).length === 0 && (
-           <div className="p-8 text-center text-slate-400">
-             <p className="text-sm">No questions found.</p>
+        {visibleCount === 0 && (
+           <div className="p-8 text-center text-slate-400 flex flex-col items-center">
+             <svg className="w-10 h-10 mb-2 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+             <p className="text-sm">No questions found for {selectedLevel}.</p>
+             <p className="text-xs text-slate-300 mt-1">Try switching levels or filter modes.</p>
            </div>
         )}
       </div>
 
-      {/* Bulk Actions Footer */}
+      {/* Footer */}
       <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-col gap-2">
          {isBatchProcessing && (
             <div className="mb-2">

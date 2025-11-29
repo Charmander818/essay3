@@ -578,7 +578,7 @@ AO3 Evaluation (max 4 marks)
     chapter: "2.2 Price elasticity, income elasticity and cross elasticity of demand",
     maxMarks: 8,
     questionText: "Explain, with the help of examples, the significance of the size and sign of the coefficient of income elasticity of demand for the classification of a good and consider how confident you are of this classification.",
-    markScheme: `AO1 Knowledge and Understanding (max 3 marks)
+    markScheme: `AO1 Knowledge and Understanding (max 3marks)
 Knowledge of what is meant by income elasticity of demand (1)
 Formula for calculation of income elasticity of demand (1)
 Meaning of elastic/inelastic income elasticity of demand (1)
@@ -588,7 +588,7 @@ Analysis of the significance of the size and sign of the coefficient for normal 
 Analysis of the significance of the size and sign of the coefficient for necessity goods with relevant examples (1)
 Analysis of the significance of the size and sign of the coefficient for inferior goods with relevant examples (1)
 Analysis of the significance of the size and sign of the coefficient for superior goods with relevant examples (1)
-Award maximum of 1 mark for two types of good but with no examples.
+Award maximum of 1mark for two types of good but with no examples.
 Award maximum of 2 marks for three types of good but with no examples.
 
 AO3 Evaluation (max 2 marks)
@@ -608,7 +608,7 @@ For a brief comment such as
     chapter: "2.5 Consumer and producer surplus",
     maxMarks: 12,
     questionText: "When the price of a product changes, it usually changes the consumer surplus in the market. Assess how variations in price elasticity of demand for a product determine the extent of changes in consumer surplus in a market.",
-    markScheme: `AO1 Knowledge and understanding and AO2 Analysis (max 8 marks)
+    markScheme: `AO1 Knowledge and understanding and AO2Analysis (max 8 marks)
 • Knowledge and understanding of consumer surplus
 • Accurate labelled diagram of consumer surplus
 • Explanation of effects on consumer surplus when the price of a product increases
@@ -655,7 +655,7 @@ AO3 Evaluation (max 2 marks)
     chapter: "3.2 Methods and effects of government intervention in markets",
     maxMarks: 12,
     questionText: "Assess the effectiveness of government intervention through buffer stock schemes in agricultural markets.",
-    markScheme: `AO1 Knowledge and understanding and AO2 Analysis (max 8 marks)
+    markScheme: `AO1 Knowledge and understanding and AO2Analysis (max 8 marks)
 The advantages and disadvantages of a buffer stock scheme in agricultural markets may include
 • Effective in smoothing out price changes, particularly where these are volatile
 • Responsive to market conditions
@@ -711,7 +711,7 @@ Consideration how a budget deficit or a trade deficit leads to disequilibrium in
     chapter: "4.2 Introduction to the circular flow of income",
     maxMarks: 12,
     questionText: "Assess whether an increase in investment in new infrastructure projects will always have a positive impact on the circular flow of income in an economy.",
-    markScheme: `AO1 Knowledge and understanding and AO2 Analysis (max 8 marks)
+    markScheme: `AO1 Knowledge and understanding and AO2Analysis (max 8 marks)
 Increased investment in new infrastructure can have a positive and negative impact on the circular flow of income in an economy:
 • Increased investment can be from firms or government
 • Household savings can be a source of funds for this investment
@@ -762,7 +762,7 @@ The effectiveness of monetary policy will depend upon the response of consumers 
     chapter: "5.1 Government macroeconomic policy objectives",
     maxMarks: 12,
     questionText: "Assess how governments use macroeconomic intervention to achieve their macroeconomic objectives.",
-    markScheme: `AO1 Knowledge and understanding and AO2 Analysis (max 8 marks)
+    markScheme: `AO1 Knowledge and understanding and AO2Analysis (max 8 marks)
 • Macroeconomic objective of price stability
 • Macroeconomic objective of low unemployment
 • Macroeconomic objective of economic growth
@@ -2320,7 +2320,7 @@ AO3 Evaluation
 • A recognition that expansionary fiscal policy can have both advantages and disadvantages.
 • In conclusion, whether an expansionary fiscal policy is always beneficial to an economy.`
   },
-  
+
   // ==============================================================================
   // MAY / JUNE 2025 (9708/22)
   // ==============================================================================

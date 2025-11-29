@@ -149,6 +149,11 @@ const EssayImprover: React.FC<Props> = ({
     setIsGrading(false);
   };
 
+  const handleAnswerChange = (id: number, value: string) => {
+    const newAnswers = { ...answers, [id]: value };
+    setAnswers(newAnswers);
+  };
+
   const handleReset = () => {
       if(confirm("This will clear the current exercise. Continue?")) {
           setMode('initial');
@@ -189,10 +194,7 @@ const EssayImprover: React.FC<Props> = ({
                 <input
                   type="text"
                   value={answers[id] || ""}
-                  onChange={(e) => {
-                      const newAnswers = { ...answers, [id]: e.target.value };
-                      setAnswers(newAnswers);
-                  }}
+                  onChange={(e) => handleAnswerChange(id, e.target.value)}
                   placeholder={`(${blank?.hint || '...'})`}
                   className={`min-w-[120px] max-w-[300px] border-b-2 ${borderColor} ${bgColor} px-1 py-0.5 outline-none focus:border-blue-500 transition-colors text-center text-base font-sans font-medium text-slate-700`}
                 />
@@ -213,6 +215,59 @@ const EssayImprover: React.FC<Props> = ({
         })}
       </div>
     );
+  };
+
+  const renderManualCreationMode = () => {
+      return (
+          <div className="flex flex-col h-full">
+              <div className="mb-4 p-4 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800">
+                  <p className="font-bold mb-1">Instructions:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                      <li>Highlight any word or phrase in the text box below.</li>
+                      <li>Click <strong>"Mask Selected Text"</strong> to turn it into a blank.</li>
+                      <li>When finished, click <strong>"Start Exercise"</strong>.</li>
+                  </ul>
+              </div>
+
+              <div className="flex-1 relative mb-4">
+                  <textarea 
+                      ref={textareaRef}
+                      value={manualText}
+                      onChange={(e) => setManualText(e.target.value)} // Allow editing base text if needed
+                      onSelect={handleTextSelect}
+                      className="w-full h-full p-6 border border-slate-300 rounded-xl resize-none font-serif text-lg leading-relaxed focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  />
+              </div>
+
+              <div className="flex items-end gap-4 bg-white p-4 border-t border-slate-100">
+                  <div className="flex-1">
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Hint (Optional)</label>
+                      <input 
+                          type="text" 
+                          value={customHint} 
+                          onChange={(e) => setCustomHint(e.target.value)}
+                          placeholder="e.g. Key Term"
+                          className="w-full p-2 border border-slate-300 rounded text-sm"
+                      />
+                  </div>
+                  <button 
+                      onClick={applyManualMask}
+                      disabled={selectionStart === null}
+                      className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed h-10"
+                  >
+                      Mask Selection
+                  </button>
+                  <div className="w-px h-10 bg-slate-200 mx-2"></div>
+                  <button 
+                      onClick={finishManualCreation}
+                      disabled={manualBlanks.length === 0}
+                      className="px-6 py-2 bg-emerald-600 text-white font-bold rounded-lg shadow-lg hover:bg-emerald-700 disabled:opacity-50 h-10"
+                  >
+                      Start Exercise ({manualBlanks.length})
+                  </button>
+              </div>
+          </div>
+      );
   };
 
   return (
@@ -260,56 +315,7 @@ const EssayImprover: React.FC<Props> = ({
                  </div>
             )}
 
-            {mode === 'manual_creating' && (
-                <div className="flex flex-col h-full">
-                    <div className="mb-4 p-4 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800">
-                        <p className="font-bold mb-1">Instructions:</p>
-                        <ul className="list-disc list-inside space-y-1">
-                            <li>Highlight any word or phrase in the text box below.</li>
-                            <li>Click <strong>"Mask Selected Text"</strong> to turn it into a blank.</li>
-                            <li>When finished, click <strong>"Start Exercise"</strong>.</li>
-                        </ul>
-                    </div>
-
-                    <div className="flex-1 relative mb-4">
-                        <textarea 
-                            ref={textareaRef}
-                            value={manualText}
-                            onChange={(e) => setManualText(e.target.value)} // Allow editing base text if needed
-                            onSelect={handleTextSelect}
-                            className="w-full h-full p-6 border border-slate-300 rounded-xl resize-none font-serif text-lg leading-relaxed focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                        />
-                    </div>
-
-                    <div className="flex items-end gap-4 bg-white p-4 border-t border-slate-100">
-                        <div className="flex-1">
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Hint (Optional)</label>
-                            <input 
-                                type="text" 
-                                value={customHint} 
-                                onChange={(e) => setCustomHint(e.target.value)}
-                                placeholder="e.g. Key Term"
-                                className="w-full p-2 border border-slate-300 rounded text-sm"
-                            />
-                        </div>
-                        <button 
-                            onClick={applyManualMask}
-                            disabled={selectionStart === null}
-                            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed h-10"
-                        >
-                            Mask Selection
-                        </button>
-                        <div className="w-px h-10 bg-slate-200 mx-2"></div>
-                        <button 
-                            onClick={finishManualCreation}
-                            disabled={manualBlanks.length === 0}
-                            className="px-6 py-2 bg-emerald-600 text-white font-bold rounded-lg shadow-lg hover:bg-emerald-700 disabled:opacity-50 h-10"
-                        >
-                            Start Exercise ({manualBlanks.length})
-                        </button>
-                    </div>
-                </div>
-            )}
+            {mode === 'manual_creating' && renderManualCreationMode()}
 
             {mode === 'practice' && renderPracticeMode()}
         </div>
