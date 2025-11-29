@@ -12,7 +12,7 @@ interface SidebarProps {
   questionStates: Record<string, QuestionState>;
   onExportAll: () => void;
   onBatchGenerate: () => void;
-  onOpenCodeExport: () => void; // New prop
+  onOpenCodeExport: () => void;
   isBatchProcessing: boolean;
   batchProgress: string;
 }
@@ -57,15 +57,21 @@ const Sidebar: React.FC<SidebarProps> = ({
 
     const groups: Record<string, Record<string, Question[]>> = {};
     
-    // Initialize topics in order
+    // Initialize topics in order from the Enum to preserve syllabus order
     Object.values(SyllabusTopic).forEach(topic => {
       groups[topic] = {};
     });
 
     filtered.forEach(q => {
+      // Ensure topic exists (handle edge case where data.ts might have a typo or new topic)
       if (!groups[q.topic]) groups[q.topic] = {};
-      if (!groups[q.topic][q.chapter]) groups[q.topic][q.chapter] = [];
-      groups[q.topic][q.chapter].push(q);
+      
+      const chapterKey = q.chapter || "General / Uncategorized";
+      
+      if (!groups[q.topic][chapterKey]) {
+          groups[q.topic][chapterKey] = [];
+      }
+      groups[q.topic][chapterKey].push(q);
     });
     
     return groups;
@@ -77,7 +83,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex justify-between items-center mb-4">
           <div>
             <h1 className="text-lg font-bold text-slate-800 tracking-tight">CIE Econ Master</h1>
-            <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">A Level (9708)</p>
+            <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">
+               {questions.length} Questions Loaded
+            </p>
           </div>
           <button 
             onClick={onAddQuestionClick}
@@ -136,13 +144,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
            return (
             <div key={topic} className="mb-6 px-4">
-              <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 pl-1">
+              <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 pl-1 sticky top-0 bg-white/95 backdrop-blur-sm py-1 z-10">
                 {topic}
               </h2>
               
               {Object.entries(chapters).map(([chapter, topicQuestions]) => (
                  topicQuestions.length > 0 && (
-                  <div key={chapter} className="mb-4 pl-2 border-l-2 border-slate-100 ml-1">
+                  <div key={chapter} className="mb-4 pl-2 border-l-2 border-slate-100 ml-1 hover:border-slate-300 transition-colors">
                     <h3 className="text-xs font-semibold text-slate-700 mb-2 truncate pl-2" title={chapter}>
                       {chapter}
                     </h3>
@@ -168,7 +176,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                               <div className="flex justify-between items-center mb-1.5">
                                 <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400 flex items-center gap-1.5">
                                   <span className="bg-slate-100 px-1.5 rounded text-slate-500">
-                                    {q.variant.split('/')[0]} '{q.year.slice(2)}
+                                    {q.variant?.split('/')[0]} '{q.year?.slice(2)}
                                   </span>
                                   {hasSavedWork && (
                                     <span title="Contains saved work" className="text-emerald-500 flex items-center">
