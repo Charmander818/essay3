@@ -1,7 +1,7 @@
+
 import { Question, SyllabusTopic } from "./types";
 
 export const questions: Question[] = [
-  // FEB/MARCH 2023
   {
     id: "fm23-22-2a",
     year: "2023",
@@ -177,8 +177,6 @@ AO3 Evaluation
 Points to consider may include:
 the cause of the deficit, the cost and ease of introducing various policies, the possible unintended consequences of introducing policies etc. leading to a justified conclusion as to whether supply-side policies would be the most effective way to correct a deficit in the current account of the balance of payments of an economy.`
   },
-
-  // MAY/JUNE 2023 - Paper 21
   {
     id: "mj23-21-2a",
     year: "2023",
@@ -349,8 +347,6 @@ AO3 Evaluation
 • Considers the possible issues of protectionism and the relative strength of the different arguments.
 • In conclusion, which approach will be better for particular economic situations.`
   },
-
-  // MAY/JUNE 2023 - Paper 22
   {
     id: "mj23-22-2a",
     year: "2023",
@@ -557,8 +553,6 @@ AO3 Evaluation (max 4 marks)
 • Although it is not necessary within the analysis / question, reference may be made to the relative effectiveness of these policies in controlling the different types of inflation.
 • A justified conclusion showing which policy is most likely to be effective in controlling high rates of inflation.`
   },
-
-  // MAY/JUNE 2023 - Paper 23
   {
     id: "mj23-23-2a",
     year: "2023",
@@ -769,10 +763,6 @@ AO3 Evaluation (max 4 marks)
 • Consideration of the extent to which macroeconomic intervention allows governments to achieve their macroeconomic policy objectives
 • Effectiveness of particular interventions in relation to specific macroeconomic objectives`
   },
-
-  // ==============================================================================
-  // OCT / NOV 2023 (9708/21)
-  // ==============================================================================
   {
     id: "on23-21-2a",
     year: "2023",
@@ -952,10 +942,6 @@ AO3 Evaluation (Up to 4 marks)
 • Considers the various assumptions of the theories 
 • In conclusion, are the theories substantially undermined by their various limitations?`
   },
-
-  // ==============================================================================
-  // OCT / NOV 2023 (9708/22)
-  // ==============================================================================
   {
     id: "on23-22-2a",
     year: "2023",
@@ -1164,10 +1150,6 @@ AO3 Evaluation
 • An assessment of which effects are likely to be the most serious. 
 • A justified conclusion as to which effect is likely to be the most serious.`
   },
-
-  // ==============================================================================
-  // OCT / NOV 2023 (9708/23)
-  // ==============================================================================
   {
     id: "on23-23-2a",
     year: "2023",
@@ -1339,10 +1321,6 @@ AO3 Evaluation
 • Requires an assessment of the protectionism and at least one other policy in reducing a current account deficit which leads to 
 • A justified conclusion as to which policy may be best way to reduce economic growth or whether a combination of policies might be more appropriate.`
   },
-
-  // ==============================================================================
-  // OCT / NOV 2024 (9708/21)
-  // ==============================================================================
   {
     id: "on24-21-2a",
     year: "2024",
@@ -1555,10 +1533,6 @@ AO3 Evaluation
 • Considers the size of the surplus and the possible reasons for it.
 • In conclusion, will an economy always benefit from having a surplus?`
   },
-
-  // ==============================================================================
-  // OCT / NOV 2024 (9708/22)
-  // ==============================================================================
   {
     id: "on24-22-2a",
     year: "2024",
@@ -1741,10 +1715,6 @@ AO3 Evaluation
 • If part of the analysis, this should also include an assessment of the difficulties of achieving other objectives against the desirability of a balanced budget to gain higher level evaluation marks.
 • Leading to an overall and balanced conclusion.`
   },
-
-  // ==============================================================================
-  // OCT / NOV 2024 (9708/23)
-  // ==============================================================================
   {
     id: "on24-23-2a",
     year: "2024",
@@ -1915,10 +1885,6 @@ AO3 Evaluation
 • Requires an assessment of the protectionism and at least one other policy in reducing a current account deficit which leads to 
 • A justified conclusion as to which policy may be best way to reduce economic growth or whether a combination of policies might be more appropriate.`
   },
-
-  // ==============================================================================
-  // FEB / MARCH 2025 (9708/22)
-  // ==============================================================================
   {
     id: "fm25-22-2a",
     year: "2025",
@@ -2113,10 +2079,6 @@ AO3 Evaluation
 • A recognition that expansionary fiscal policy can have both advantages and disadvantages.
 • In conclusion, whether an expansionary fiscal policy is always beneficial to an economy.`
   },
-  
-  // ==============================================================================
-  // MAY / JUNE 2025 (9708/21)
-  // ==============================================================================
   {
     id: "mj25-21-2a",
     year: "2025",
@@ -2311,10 +2273,6 @@ AO3 Evaluation
 • A recognition that expansionary fiscal policy can have both advantages and disadvantages.
 • In conclusion, whether an expansionary fiscal policy is always beneficial to an economy.`
   },
-  
-  // ==============================================================================
-  // MAY / JUNE 2025 (9708/22)
-  // ==============================================================================
   {
     id: "mj25-22-2a",
     year: "2025",
@@ -2464,10 +2422,6 @@ An assessment of the extent to which changes in the relative rates of interest m
 AO3 Evaluation
 For a clear comparison of the analysis of the benefits and drawbacks of both scenarios leading to a justified conclusion.`
   },
-
-  // ==============================================================================
-  // MAY / JUNE 2025 (9708/23)
-  // ==============================================================================
   {
     id: "mj25-23-2a",
     year: "2025",
@@ -2629,5 +2583,38 @@ AO3 Evaluation (max 2 marks)
 
 AO3 Evaluation
 Requires an assessment of the extent to which government policy can influence an economy’s comparative advantage in a good or service which leads to a justified conclusion as to which perspective is most likely to prevail.`
+  },
+  {
+    id: "custom-1764404718817",
+    year: "2024",
+    paper: "9708/22",
+    variant: "Feb/March",
+    questionNumber: "5(a)",
+    topic: SyllabusTopic.MACROECONOMY,
+    chapter: "4.4 Economic growth",
+    maxMarks: 7,
+    questionText: "With the help of an aggregate demand and aggregate supply diagram, explain how a decrease in interest rates could cause economic growth and consider whether economic growth will always result in inflation.",
+    markScheme: `Follow the point-based marking guidance at the top of this mark scheme and 
+award:
+up to 3 marks for AO1 Knowledge and understanding up to 3 marks for AO2 
+Analysis
+up to 2 marks for AO3 Evaluation.
+AO1 Knowledge and Understanding (max 3 marks)
+A clear understanding of what is meant by:
+• economic growth (1)
+• inflation (1)
+• interest rates (1)
+• through an accurate diagram, correctly labelled axes, and equilibrium 
+price level and real GDP (1).
+AO2 Analysis (max 3 marks)
+Uses the diagram(s) to explain how a decrease in interest rates will impact on 
+saving/borrowing (1) that cause will either cause an increase in 
+consumption/investment/next exports (1) which causes an increase in 
+economic growth/real GDP (1).
+AO3 Evaluation (max 2 marks)
+One mark for a valid explanation that rise in inflation assumes that the 
+economy is operating at full capacity; the growth may be focused on capital 
+intensive industries (1) or that the source of the growth may be long term in 
+nature (1). The second mark is for a justified conclusion.`
   }
 ];
