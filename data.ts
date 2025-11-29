@@ -260,4 +260,8 @@ AO3 (2 marks): Effect uncertain (PED). Other policies? Retaliation? Justified co
     markScheme: `AO1/AO2 (8 marks): Protectionism advantages (tariffs reduce imports, infant industries). Problems (PED, retaliation, cost-push inflation). Alternative policies (contractionary monetary).
 AO3 (4 marks): Assessment of protectionism vs other policies. Justified conclusion.`
   }
+
+  // --- PASTE NEW QUESTIONS BELOW THIS LINE ---
+  // (Make sure to add a comma after the previous item if needed)
+  
 ];
