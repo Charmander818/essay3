@@ -1,10 +1,7 @@
-
 import { Question, SyllabusTopic } from "./types";
 
 export const questions: Question[] = [
-  // ==============================================================================
-  // FEB / MARCH 2023 (9708/22)
-  // ==============================================================================
+  // FEB/MARCH 2023
   {
     id: "fm23-22-2a",
     year: "2023",
@@ -181,9 +178,7 @@ Points to consider may include:
 the cause of the deficit, the cost and ease of introducing various policies, the possible unintended consequences of introducing policies etc. leading to a justified conclusion as to whether supply-side policies would be the most effective way to correct a deficit in the current account of the balance of payments of an economy.`
   },
 
-  // ==============================================================================
-  // MAY / JUNE 2023 (9708/21)
-  // ==============================================================================
+  // MAY/JUNE 2023 - Paper 21
   {
     id: "mj23-21-2a",
     year: "2023",
@@ -355,9 +350,7 @@ AO3 Evaluation
 • In conclusion, which approach will be better for particular economic situations.`
   },
 
-  // ==============================================================================
-  // MAY / JUNE 2023 (9708/22)
-  // ==============================================================================
+  // MAY/JUNE 2023 - Paper 22
   {
     id: "mj23-22-2a",
     year: "2023",
@@ -565,9 +558,7 @@ AO3 Evaluation (max 4 marks)
 • A justified conclusion showing which policy is most likely to be effective in controlling high rates of inflation.`
   },
 
-  // ==============================================================================
-  // MAY / JUNE 2023 (9708/23)
-  // ==============================================================================
+  // MAY/JUNE 2023 - Paper 23
   {
     id: "mj23-23-2a",
     year: "2023",
@@ -2320,7 +2311,7 @@ AO3 Evaluation
 • A recognition that expansionary fiscal policy can have both advantages and disadvantages.
 • In conclusion, whether an expansionary fiscal policy is always beneficial to an economy.`
   },
-
+  
   // ==============================================================================
   // MAY / JUNE 2025 (9708/22)
   // ==============================================================================

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import Sidebar from './components/Sidebar';
 import EssayGenerator from './components/EssayGenerator';
@@ -13,20 +12,26 @@ import { generateModelAnswer, generateClozeExercise } from './services/geminiSer
 
 const STORAGE_KEY_CUSTOM_QUESTIONS = 'cie_econ_custom_questions_v2';
 const STORAGE_KEY_WORK = 'cie_economics_work_v1';
+const SESSION_KEY_AUTH = 'cie_econ_auth_session';
+
+// Basic protection. In production, use server-side auth.
+const APP_PASSWORD = "cie2024"; 
 
 const App: React.FC = () => {
-  // Load custom questions from LocalStorage (Personal Local Data)
+  // --- Authentication State ---
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem(SESSION_KEY_AUTH) === 'true';
+  });
+  const [passwordInput, setPasswordInput] = useState("");
+  const [authError, setAuthError] = useState("");
+
+  // --- Application State ---
   const [customQuestions, setCustomQuestions] = useState<Question[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEY_CUSTOM_QUESTIONS);
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Combine static data.ts questions with local custom questions
-  // Use useMemo to ensure stability and efficiency
   const allQuestions = useMemo(() => {
-    // If a custom question has the same ID as a static one (user promoted it to data.ts),
-    // prefer the static one to avoid duplicates, OR filter out the custom one.
-    // Here we filter out custom questions that clash with static IDs.
     const staticIds = new Set(initialQuestions.map(q => q.id));
     const uniqueCustom = customQuestions.filter(q => !staticIds.has(q.id));
     return [...initialQuestions, ...uniqueCustom];
@@ -34,23 +39,19 @@ const App: React.FC = () => {
 
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [mode, setMode] = useState<AppMode>(AppMode.GENERATOR);
-  
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCodeExportOpen, setIsCodeExportOpen] = useState(false);
   const [questionToEdit, setQuestionToEdit] = useState<Question | null>(null);
   
-  // Store state for each question
   const [questionStates, setQuestionStates] = useState<Record<string, QuestionState>>(() => {
     const saved = localStorage.getItem(STORAGE_KEY_WORK);
     return saved ? JSON.parse(saved) : {};
   });
 
-  // Batch Processing State
   const [isBatchProcessing, setIsBatchProcessing] = useState(false);
   const [batchProgress, setBatchProgress] = useState("");
 
-  // Persistence Effects
+  // --- Effects ---
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_CUSTOM_QUESTIONS, JSON.stringify(customQuestions));
   }, [customQuestions]);
@@ -58,6 +59,18 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_WORK, JSON.stringify(questionStates));
   }, [questionStates]);
+
+  // --- Handlers ---
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === APP_PASSWORD) {
+      setIsAuthenticated(true);
+      sessionStorage.setItem(SESSION_KEY_AUTH, 'true');
+      setAuthError("");
+    } else {
+      setAuthError("Incorrect password");
+    }
+  };
 
   const getQuestionState = (id: string): QuestionState => {
     return questionStates[id] || {
@@ -85,20 +98,11 @@ const App: React.FC = () => {
 
   const handleSaveQuestion = (question: Question) => {
     if (questionToEdit) {
-      // If editing a custom question, update it in custom list
       if (question.id.startsWith('custom-')) {
           setCustomQuestions(prev => prev.map(q => q.id === question.id ? question : q));
       } else {
-          // If editing a standard question... technically we can't 'save' this to data.ts from here.
-          // We'll effectively clone it into a custom question if we want to support it, 
-          // OR for now, just allow editing the in-memory version but warn it won't persist if not custom.
-          // Simplest approach: Treat it as a "local override" which we are storing in customQuestions for now
-          // assuming we handle ID collision.
-          // BUT for this specific request "add new question banks", we focus on adding.
-          // Let's just update the custom list.
           alert("Note: You are editing a standard question locally. This change is saved in your browser but won't affect the official list unless exported.");
           setCustomQuestions(prev => {
-              // Remove old if exists in custom, add new
               return [...prev.filter(q => q.id !== question.id), question];
           });
       }
@@ -107,7 +111,6 @@ const App: React.FC = () => {
         setSelectedQuestion(question);
       }
     } else {
-      // Adding new
       setCustomQuestions(prev => [...prev, question]);
       setSelectedQuestion(question);
     }
@@ -121,21 +124,8 @@ const App: React.FC = () => {
       if (selectedQuestion?.id === id) {
         setSelectedQuestion(null);
       }
-      // We don't delete the work state, in case they re-add it or it was a mistake
     }
   };
-
-  const handleEditClick = (question: Question) => {
-    setQuestionToEdit(question);
-    setIsModalOpen(true);
-  };
-
-  const handleAddClick = () => {
-    setQuestionToEdit(null);
-    setIsModalOpen(true);
-  };
-
-  // --- Bulk Action Handlers ---
 
   const handleBatchGenerate = async () => {
     if (isBatchProcessing) return;
@@ -157,11 +147,9 @@ const App: React.FC = () => {
         };
         let essay = state.generatorEssay;
 
-        // 1. Generate Essay if missing
         if (!essay) {
             try {
                 essay = await generateModelAnswer(q);
-                // Delay to respect rate limits
                 await new Promise(r => setTimeout(r, 4000));
             } catch (e) {
                 console.error(`Failed to generate essay for ${q.id}`, e);
@@ -169,21 +157,17 @@ const App: React.FC = () => {
             }
         }
 
-        // 2. Generate Cloze if missing AND we have an essay
         let clozeData = state.clozeData;
         if (essay && !clozeData) {
             try {
                 const result = await generateClozeExercise(essay);
-                if (result) {
-                   clozeData = result;
-                }
+                if (result) clozeData = result;
                 await new Promise(r => setTimeout(r, 4000));
             } catch (e) {
                 console.error(`Failed to generate cloze for ${q.id}`, e);
             }
         }
 
-        // Save progress
         updateQuestionState(q.id, { 
             generatorEssay: essay,
             clozeData: clozeData
@@ -204,7 +188,6 @@ const App: React.FC = () => {
         <hr/>
     `;
 
-    // Sort questions by topic then chapter
     const sortedQuestions = [...allQuestions].sort((a, b) => {
         if (a.topic !== b.topic) return a.topic.localeCompare(b.topic);
         return a.chapter.localeCompare(b.chapter);
@@ -227,7 +210,6 @@ const App: React.FC = () => {
                 </div>
         `;
 
-        // Model Answer
         if (state.generatorEssay) {
             let formattedEssay = state.generatorEssay
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -242,7 +224,6 @@ const App: React.FC = () => {
             htmlBody += `<p style="color:#999; font-family: Calibri, sans-serif;"><em>(No model answer generated)</em></p>`;
         }
 
-        // Cloze
         if (state.clozeData) {
             htmlBody += `<h3 style="color:#2E74B5; border-bottom: 1px solid #ccc; margin-top: 20px; font-family: Calibri, sans-serif;">Logic Chain Exercise</h3>`;
             htmlBody += `<p style="font-family: Calibri, sans-serif;"><em>Instructions: Fill in the blanks to complete the logical chain.</em></p>`;
@@ -296,15 +277,63 @@ const App: React.FC = () => {
     document.body.removeChild(link);
   };
 
+  // --- Login Screen ---
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4">
+        <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            </div>
+            <h1 className="text-2xl font-bold text-slate-800">CIE Economics Master</h1>
+            <p className="text-slate-500 mt-2 text-sm">Protected Access</p>
+          </div>
+          
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1 tracking-wider">Password</label>
+              <input 
+                type="password" 
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                placeholder="Enter access code"
+                autoFocus
+              />
+            </div>
+            
+            {authError && (
+              <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded border border-red-100">
+                {authError}
+              </div>
+            )}
+            
+            <button 
+              type="submit" 
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-all active:scale-[0.98]"
+            >
+              Unlock Access
+            </button>
+          </form>
+          
+          <p className="text-center mt-6 text-xs text-slate-400">
+            Authorized personnel only.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
       <Sidebar 
         questions={allQuestions}
         onSelectQuestion={setSelectedQuestion} 
         selectedQuestionId={selectedQuestion?.id || null}
-        onAddQuestionClick={handleAddClick}
+        onAddQuestionClick={() => { setQuestionToEdit(null); setIsModalOpen(true); }}
         onDeleteQuestion={handleDeleteQuestion}
-        onEditQuestion={handleEditClick}
+        onEditQuestion={(q) => { setQuestionToEdit(q); setIsModalOpen(true); }}
         questionStates={questionStates}
         onExportAll={handleExportAll}
         onBatchGenerate={handleBatchGenerate}
@@ -389,7 +418,7 @@ const App: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
               <h3 className="text-xl font-semibold text-slate-600 mb-2">Welcome to Essay Master</h3>
-              <p className="max-w-md text-center mb-6">Select a question from the syllabus topics on the left, or add your own question to start generating answers, grading essays, or practicing in real-time.</p>
+              <p className="max-w-md text-center mb-6">Select a question from the sidebar to start.</p>
               <p className="text-sm text-slate-400">Your questions and essays are automatically saved locally.</p>
             </div>
           )}
