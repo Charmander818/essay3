@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Question, SyllabusTopic } from '../types';
 import { SYLLABUS_STRUCTURE, Level } from '../syllabusData';
@@ -32,7 +31,9 @@ const AddQuestionModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialQue
     if (isOpen) {
       if (initialQuestion) {
         // Detect level based on topic
-        const isAL = Object.values(SYLLABUS_STRUCTURE["A Level"].topics).includes(initialQuestion.topic);
+        // Use type assertion to avoid indexing errors
+        const alTopics: SyllabusTopic[] = SYLLABUS_STRUCTURE["A Level"].topics;
+        const isAL = alTopics.includes(initialQuestion.topic);
         setLevel(isAL ? "A Level" : "AS");
         
         setFormData({
@@ -58,7 +59,10 @@ const AddQuestionModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialQue
     setLevel(newLevel);
     const availableTopics = SYLLABUS_STRUCTURE[newLevel].topics;
     const defaultTopic = availableTopics[0];
-    const defaultChapters = SYLLABUS_STRUCTURE[newLevel].chapters[defaultTopic] || [];
+    
+    // Cast chapters to Record<string, string[]> to allow indexing with any SyllabusTopic
+    const chaptersMap = SYLLABUS_STRUCTURE[newLevel].chapters as Record<string, string[]>;
+    const defaultChapters = chaptersMap[defaultTopic] || [];
     
     setFormData(prev => ({
       ...prev,
@@ -69,7 +73,8 @@ const AddQuestionModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialQue
 
   // Handle Topic Change -> Reset Chapter
   const handleTopicChange = (newTopic: SyllabusTopic) => {
-    const defaultChapters = SYLLABUS_STRUCTURE[level].chapters[newTopic] || [];
+    const chaptersMap = SYLLABUS_STRUCTURE[level].chapters as Record<string, string[]>;
+    const defaultChapters = chaptersMap[newTopic] || [];
     setFormData(prev => ({
       ...prev,
       topic: newTopic,
@@ -91,7 +96,8 @@ const AddQuestionModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialQue
   };
 
   const currentTopics = SYLLABUS_STRUCTURE[level].topics;
-  const currentChapters = SYLLABUS_STRUCTURE[level].chapters[formData.topic] || [];
+  const chaptersMap = SYLLABUS_STRUCTURE[level].chapters as Record<string, string[]>;
+  const currentChapters = chaptersMap[formData.topic] || [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -174,7 +180,7 @@ const AddQuestionModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialQue
                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all"
               >
                  <option value="" disabled>Select a chapter...</option>
-                 {currentChapters.map(c => (
+                 {currentChapters.map((c: string) => (
                    <option key={c} value={c}>{c}</option>
                  ))}
               </select>
