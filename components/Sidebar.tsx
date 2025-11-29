@@ -259,8 +259,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             onClick={onOpenCodeExport}
             className="mt-1 w-full text-[10px] text-slate-400 hover:text-blue-600 font-medium flex items-center justify-center gap-1 py-1 transition-colors"
          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
-            Get Question Code (Sync to Vercel)
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m-4-4v12" /></svg>
+            Sync Data (Download data.ts)
          </button>
       </div>
     </div>

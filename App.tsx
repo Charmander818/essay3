@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import Sidebar from './components/Sidebar';
 import EssayGenerator from './components/EssayGenerator';
@@ -405,7 +406,7 @@ const App: React.FC = () => {
       <CodeExportModal
          isOpen={isCodeExportOpen}
          onClose={() => setIsCodeExportOpen(false)}
-         customQuestions={customQuestions}
+         questions={allQuestions}
       />
     </div>
   );

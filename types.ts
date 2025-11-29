@@ -5,7 +5,14 @@ export enum SyllabusTopic {
   GOVT_MICRO = "3. Govt Micro Intervention",
   MACROECONOMY = "4. The Macroeconomy",
   GOVT_MACRO = "5. Govt Macro Intervention",
-  INTERNATIONAL = "6. International Economic Issues"
+  INTERNATIONAL = "6. International Economic Issues",
+  
+  // A Level Topics
+  PRICE_SYSTEM_AL = "7. The Price System & Microeconomy (AL)",
+  GOVT_MICRO_AL = "8. Govt Micro Intervention (AL)",
+  MACROECONOMY_AL = "9. The Macroeconomy (AL)",
+  GOVT_MACRO_AL = "10. Govt Macro Intervention (AL)",
+  INTERNATIONAL_AL = "11. International Economic Issues (AL)"
 }
 
 export interface Question {
