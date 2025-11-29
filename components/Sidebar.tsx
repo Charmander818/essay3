@@ -84,7 +84,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div>
             <h1 className="text-lg font-bold text-slate-800 tracking-tight">CIE Econ Master</h1>
             <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">
-               {questions.length} Questions Loaded
+               Total Questions: {questions.length}
             </p>
           </div>
           <button 
