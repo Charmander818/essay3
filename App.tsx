@@ -14,8 +14,8 @@ const STORAGE_KEY_CUSTOM_QUESTIONS = 'cie_econ_custom_questions_v2';
 const STORAGE_KEY_WORK = 'cie_economics_work_v1';
 const SESSION_KEY_AUTH = 'cie_econ_auth_session';
 
-// Basic protection. In production, use server-side auth.
-const APP_PASSWORD = "cie2024"; 
+// Basic protection.
+const APP_PASSWORD = "kittymoni"; 
 
 const App: React.FC = () => {
   // --- Authentication State ---

@@ -38,6 +38,18 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [selectedLevel, setSelectedLevel] = useState<Level>('AS');
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>('syllabus');
+  
+  // New Filter States
+  const [yearFilter, setYearFilter] = useState<string>('all');
+  const [seasonFilter, setSeasonFilter] = useState<string>('all');
+
+  // Extract unique years and seasons for dropdowns
+  const availableYears = useMemo(() => {
+    const years = new Set(questions.map(q => q.year));
+    return Array.from(years).sort().reverse();
+  }, [questions]);
+
+  const availableSeasons = ["Feb/March", "May/June", "Oct/Nov"];
 
   // --- Filtering Logic ---
   const filteredQuestions = useMemo(() => {
@@ -48,7 +60,13 @@ const Sidebar: React.FC<SidebarProps> = ({
       // 1. Level Filter
       if (!validTopics.has(q.topic)) return false;
 
-      // 2. Search Filter
+      // 2. Year Filter
+      if (yearFilter !== 'all' && q.year !== yearFilter) return false;
+
+      // 3. Season Filter
+      if (seasonFilter !== 'all' && q.variant !== seasonFilter) return false;
+
+      // 4. Search Filter
       if (lowerQuery) {
         const textMatch = q.questionText.toLowerCase().includes(lowerQuery);
         const yearMatch = q.year.includes(lowerQuery);
@@ -57,7 +75,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         if (!textMatch && !yearMatch && !paperMatch && !chapterMatch) return false;
       }
 
-      // 3. Mode Filter
+      // 5. Mode Filter
       if (filterMode === 'saved') {
         const state = questionStates[q.id];
         const hasWork = state && (
@@ -72,7 +90,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       return true;
     });
-  }, [questions, selectedLevel, searchQuery, filterMode, questionStates]);
+  }, [questions, selectedLevel, searchQuery, filterMode, questionStates, yearFilter, seasonFilter]);
 
 
   // --- Grouping & Sorting Logic ---
@@ -150,30 +168,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
-                <svg className="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-            </div>
-            <input
-                type="text"
-                className="block w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                placeholder="Search questions..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {searchQuery && (
-                <button 
-                    onClick={() => setSearchQuery('')}
-                    className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600"
-                >
-                    <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                </button>
-            )}
-        </div>
-
         {/* AS / A Level Switch */}
         <div className="flex bg-slate-100 p-1 rounded-lg">
            <button
@@ -192,6 +186,50 @@ const Sidebar: React.FC<SidebarProps> = ({
            >
              A Level
            </button>
+        </div>
+
+        {/* Year & Season Filters */}
+        <div className="grid grid-cols-2 gap-2">
+            <select 
+              value={yearFilter} 
+              onChange={(e) => setYearFilter(e.target.value)}
+              className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
+            >
+                <option value="all">All Years</option>
+                {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+            <select 
+              value={seasonFilter} 
+              onChange={(e) => setSeasonFilter(e.target.value)}
+              className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
+            >
+                <option value="all">All Seasons</option>
+                {availableSeasons.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                <svg className="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+            <input
+                type="text"
+                className="block w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                placeholder="Search topic, chapter..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+            />
+             {searchQuery && (
+                <button 
+                    onClick={() => setSearchQuery('')}
+                    className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600"
+                >
+                    <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                </button>
+            )}
         </div>
 
         {/* Sort Options */}
@@ -291,7 +329,7 @@ const Sidebar: React.FC<SidebarProps> = ({
            <div className="p-8 text-center text-slate-400 flex flex-col items-center mt-10">
              <svg className="w-8 h-8 mb-2 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
              <p className="text-xs font-medium">No questions found</p>
-             <p className="text-[10px] text-slate-300 mt-1">Try adjusting filters or search</p>
+             <p className="text-[10px] text-slate-300 mt-1">Try adjusting filters</p>
            </div>
         )}
       </div>
