@@ -10,6 +10,10 @@ interface SidebarProps {
   onDeleteQuestion: (id: string) => void;
   onEditQuestion: (q: Question) => void;
   questionStates: Record<string, QuestionState>;
+  onExportAll: () => void;
+  onBatchGenerate: () => void;
+  isBatchProcessing: boolean;
+  batchProgress: string;
 }
 
 type FilterMode = 'all' | 'saved' | 'custom';
@@ -21,7 +25,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   onAddQuestionClick,
   onDeleteQuestion,
   onEditQuestion,
-  questionStates
+  questionStates,
+  onExportAll,
+  onBatchGenerate,
+  isBatchProcessing,
+  batchProgress
 }) => {
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
 
@@ -35,7 +43,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         return state && (
           (state.generatorEssay && state.generatorEssay.length > 0) || 
           (state.graderEssay && state.graderEssay.length > 0) || 
-          (state.realTimeEssay && state.realTimeEssay.length > 0)
+          (state.realTimeEssay && state.realTimeEssay.length > 0) ||
+          (state.clozeData)
         );
       }
       if (filterMode === 'custom') {
@@ -61,8 +70,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [questions, filterMode, questionStates]);
 
   return (
-    <div className="w-80 bg-white border-r border-slate-200 h-screen overflow-y-auto custom-scroll flex-shrink-0 flex flex-col">
-      <div className="p-5 border-b border-slate-100 bg-white z-20 sticky top-0 shadow-sm">
+    <div className="w-80 bg-white border-r border-slate-200 h-screen flex flex-col">
+      <div className="p-5 border-b border-slate-100 bg-white z-20 flex-shrink-0">
         <div className="flex justify-between items-center mb-4">
           <div>
             <h1 className="text-lg font-bold text-slate-800 tracking-tight">CIE Econ Master</h1>
@@ -117,7 +126,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
       
-      <div className="flex-1 py-2">
+      <div className="flex-1 overflow-y-auto custom-scroll py-2">
         {Object.entries(groupedQuestions).map(([topic, chapters]) => {
            // Only render topics that have questions after filtering
            const hasQuestions = Object.values(chapters).some(arr => arr.length > 0);
@@ -140,7 +149,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                         const hasSavedWork = questionStates[q.id] && (
                           (questionStates[q.id].generatorEssay && questionStates[q.id].generatorEssay.length > 0) || 
                           (questionStates[q.id].graderEssay && questionStates[q.id].graderEssay.length > 0) || 
-                          (questionStates[q.id].realTimeEssay && questionStates[q.id].realTimeEssay.length > 0)
+                          (questionStates[q.id].realTimeEssay && questionStates[q.id].realTimeEssay.length > 0) ||
+                          (questionStates[q.id].clozeData)
                         );
 
                         return (
@@ -208,10 +218,41 @@ const Sidebar: React.FC<SidebarProps> = ({
         {Object.keys(groupedQuestions).length === 0 && (
            <div className="p-8 text-center text-slate-400">
              <p className="text-sm">No questions found.</p>
-             {filterMode === 'saved' && <p className="text-xs mt-2">Start writing an essay to see it here.</p>}
-             {filterMode === 'custom' && <p className="text-xs mt-2">Click the + button to add a question.</p>}
            </div>
         )}
+      </div>
+
+      {/* Bulk Actions Footer */}
+      <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-col gap-2">
+         {isBatchProcessing && (
+            <div className="mb-2">
+                <div className="flex justify-between text-xs text-slate-600 mb-1">
+                    <span>Batch Generating...</span>
+                    <span>{batchProgress}</span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                    <div className="bg-blue-500 h-full rounded-full animate-pulse w-full"></div>
+                </div>
+            </div>
+         )}
+         <div className="grid grid-cols-2 gap-2">
+             <button
+               onClick={onBatchGenerate}
+               disabled={isBatchProcessing}
+               className="px-3 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg shadow-sm hover:bg-slate-50 disabled:opacity-50"
+               title="Generate Model Essays & Cloze Exercises for all missing questions"
+             >
+               {isBatchProcessing ? "Generating..." : "Auto-Generate All"}
+             </button>
+             <button
+               onClick={onExportAll}
+               disabled={isBatchProcessing}
+               className="px-3 py-2 bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-sm hover:bg-slate-700 disabled:opacity-50 flex items-center justify-center gap-1"
+             >
+               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+               Export All
+             </button>
+         </div>
       </div>
     </div>
   );

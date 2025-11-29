@@ -21,15 +21,35 @@ export interface Question {
   maxMarks: number;
 }
 
+export interface ClozeBlank {
+  id: number;
+  original: string;
+  hint: string;
+}
+
+export interface ClozeFeedback {
+  score: number;
+  comment: string;
+}
+
 export interface QuestionState {
   generatorEssay: string;
   graderEssay: string;
   graderFeedback: string;
   realTimeEssay: string;
+  
+  // Logic Trainer / Cloze State
+  clozeData?: {
+    textWithBlanks: string; // The text containing [BLANK_1] etc
+    blanks: ClozeBlank[];
+  };
+  clozeUserAnswers?: Record<number, string>;
+  clozeFeedback?: Record<number, ClozeFeedback>;
 }
 
 export enum AppMode {
   GENERATOR = "Model Essay Generator",
+  IMPROVER = "Logic Trainer",
   GRADER = "Essay Grader",
   COACH = "Real-time Coach"
 }

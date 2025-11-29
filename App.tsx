@@ -4,9 +4,11 @@ import Sidebar from './components/Sidebar';
 import EssayGenerator from './components/EssayGenerator';
 import EssayGrader from './components/EssayGrader';
 import RealTimeWriter from './components/RealTimeWriter';
+import EssayImprover from './components/EssayImprover';
 import AddQuestionModal from './components/AddQuestionModal';
 import { Question, AppMode, QuestionState } from './types';
 import { questions as initialQuestions } from './data';
+import { generateModelAnswer, generateClozeExercise } from './services/geminiService';
 
 const STORAGE_KEY_QUESTIONS = 'cie_economics_questions_v1';
 const STORAGE_KEY_WORK = 'cie_economics_work_v1';
@@ -25,11 +27,15 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [questionToEdit, setQuestionToEdit] = useState<Question | null>(null);
   
-  // Store state for each question (essays, feedback) - Initialize from Local Storage
+  // Store state for each question
   const [questionStates, setQuestionStates] = useState<Record<string, QuestionState>>(() => {
     const saved = localStorage.getItem(STORAGE_KEY_WORK);
     return saved ? JSON.parse(saved) : {};
   });
+
+  // Batch Processing State
+  const [isBatchProcessing, setIsBatchProcessing] = useState(false);
+  const [batchProgress, setBatchProgress] = useState("");
 
   // Persistence Effects
   useEffect(() => {
@@ -64,18 +70,13 @@ const App: React.FC = () => {
     }));
   };
 
-  // Handle adding or updating a question
   const handleSaveQuestion = (question: Question) => {
     if (questionToEdit) {
-      // Update existing
       setAllQuestions(prev => prev.map(q => q.id === question.id ? question : q));
-      
-      // If currently selected question is updated, update selection state
       if (selectedQuestion?.id === question.id) {
         setSelectedQuestion(question);
       }
     } else {
-      // Create new
       setAllQuestions(prev => [...prev, question]);
       setSelectedQuestion(question);
     }
@@ -83,30 +84,184 @@ const App: React.FC = () => {
     setIsModalOpen(false);
   };
 
-  // Handle deleting a question
   const handleDeleteQuestion = (id: string) => {
     if (window.confirm("Are you sure you want to delete this question?")) {
       setAllQuestions(prev => prev.filter(q => q.id !== id));
       if (selectedQuestion?.id === id) {
         setSelectedQuestion(null);
       }
-      // Clean up work state for deleted question
       const newStates = { ...questionStates };
       delete newStates[id];
       setQuestionStates(newStates);
     }
   };
 
-  // Open modal for editing
   const handleEditClick = (question: Question) => {
     setQuestionToEdit(question);
     setIsModalOpen(true);
   };
 
-  // Open modal for adding (reset edit state)
   const handleAddClick = () => {
     setQuestionToEdit(null);
     setIsModalOpen(true);
+  };
+
+  // --- Bulk Action Handlers ---
+
+  const handleBatchGenerate = async () => {
+    if (isBatchProcessing) return;
+    if (!window.confirm("This will automatically generate Model Essays and Cloze Exercises for all questions that don't have them yet. This process may take several minutes due to AI rate limits. Continue?")) return;
+
+    setIsBatchProcessing(true);
+    let count = 0;
+    const total = allQuestions.length;
+
+    for (const q of allQuestions) {
+        count++;
+        setBatchProgress(`${count} / ${total}`);
+        
+        const state = questionStates[q.id] || {};
+        let essay = state.generatorEssay;
+
+        // 1. Generate Essay if missing
+        if (!essay) {
+            try {
+                essay = await generateModelAnswer(q);
+                // Delay to respect rate limits
+                await new Promise(r => setTimeout(r, 4000));
+            } catch (e) {
+                console.error(`Failed to generate essay for ${q.id}`, e);
+                continue;
+            }
+        }
+
+        // 2. Generate Cloze if missing AND we have an essay
+        let clozeData = state.clozeData;
+        if (essay && !clozeData) {
+            try {
+                const result = await generateClozeExercise(essay);
+                if (result) {
+                   clozeData = result;
+                }
+                await new Promise(r => setTimeout(r, 4000));
+            } catch (e) {
+                console.error(`Failed to generate cloze for ${q.id}`, e);
+            }
+        }
+
+        // Save progress
+        updateQuestionState(q.id, { 
+            generatorEssay: essay,
+            clozeData: clozeData
+        });
+    }
+
+    setIsBatchProcessing(false);
+    setBatchProgress("");
+    alert("Batch generation complete!");
+  };
+
+  const handleExportAll = () => {
+    const dateStr = new Date().toLocaleDateString();
+    let htmlBody = `
+        <h1 style="color:#2E74B5; font-size:24pt; font-family: Calibri, sans-serif;">CIE A Level Economics (9708) - Study Bank</h1>
+        <p style="font-family: Calibri, sans-serif;"><strong>Export Date:</strong> ${dateStr}</p>
+        <p style="font-family: Calibri, sans-serif;"><strong>Total Questions:</strong> ${allQuestions.length}</p>
+        <hr/>
+    `;
+
+    // Sort questions by topic then chapter
+    const sortedQuestions = [...allQuestions].sort((a, b) => {
+        if (a.topic !== b.topic) return a.topic.localeCompare(b.topic);
+        return a.chapter.localeCompare(b.chapter);
+    });
+
+    sortedQuestions.forEach((q, index) => {
+        const state = questionStates[q.id] || {};
+        
+        htmlBody += `
+            <div style="margin-bottom: 30px; padding-bottom: 20px;">
+                <h2 style="color:#1F4E79; font-size:16pt; margin-top:20px; font-family: Calibri, sans-serif;">${index + 1}. ${q.topic} - ${q.chapter}</h2>
+                <div style="background-color:#f9f9f9; padding:10px; border:1px solid #ddd; font-family: Calibri, sans-serif;">
+                    <strong>${q.paper} ${q.variant} ${q.year} (${q.maxMarks} Marks)</strong><br/>
+                    <em>${q.questionText}</em>
+                </div>
+        `;
+
+        // Model Answer
+        if (state.generatorEssay) {
+            // Convert simple markdown formatting to HTML for Word
+            // This replaces **text** with <strong>text</strong> and handles newlines
+            let formattedEssay = state.generatorEssay
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n\n/g, '<br/><br/>')
+                .replace(/\n/g, '<br/>');
+            
+            htmlBody += `
+                <h3 style="color:#2E74B5; border-bottom: 1px solid #ccc; font-family: Calibri, sans-serif;">Model Answer</h3>
+                <div style="font-family: Calibri, sans-serif;">${formattedEssay}</div>
+            `;
+        } else {
+            htmlBody += `<p style="color:#999; font-family: Calibri, sans-serif;"><em>(No model answer generated)</em></p>`;
+        }
+
+        // Cloze
+        if (state.clozeData) {
+            htmlBody += `<h3 style="color:#2E74B5; border-bottom: 1px solid #ccc; margin-top: 20px; font-family: Calibri, sans-serif;">Logic Chain Exercise</h3>`;
+            htmlBody += `<p style="font-family: Calibri, sans-serif;"><em>Instructions: Fill in the blanks to complete the logical chain.</em></p>`;
+            
+            let clozeText = state.clozeData.textWithBlanks;
+            state.clozeData.blanks.forEach(b => {
+                clozeText = clozeText.replace(
+                    `[BLANK_${b.id}]`, 
+                    `<span style="color:#C00000; font-weight:bold; text-decoration:underline;">[__________]</span> (Hint: ${b.hint})`
+                );
+            });
+            
+            // Format newlines
+            clozeText = clozeText.replace(/\n/g, '<br/>');
+            
+            htmlBody += `<div style="font-family: Calibri, sans-serif; line-height:1.5;">${clozeText}</div>`;
+            
+            // Answer Key
+            htmlBody += `
+                <div style="margin-top:15px; background-color:#fffdf0; padding:10px; border:1px dashed #e6b800; font-family: Calibri, sans-serif;">
+                    <strong>Answer Key:</strong><br/>
+                    <ul style="margin:0; padding-left:20px;">
+            `;
+            state.clozeData.blanks.forEach(b => {
+                htmlBody += `<li><strong>${b.id}:</strong> ${b.original}</li>`;
+            });
+            htmlBody += `</ul></div>`;
+        }
+        
+        htmlBody += `<br/><hr/></div>`;
+    });
+
+    // Wrap in standard MS Word HTML structure
+    const fullHtml = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head>
+            <meta charset="utf-8">
+            <title>Economics Export</title>
+            <style>
+                body { font-family: 'Calibri', 'Arial', sans-serif; font-size: 11pt; }
+            </style>
+        </head>
+        <body>${htmlBody}</body>
+        </html>
+    `;
+
+    // Create a Blob with Word MIME type
+    const blob = new Blob([fullHtml], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    // .doc extension triggers Word to open it
+    link.download = `CIE_Economics_Master_Bank_${new Date().toISOString().slice(0,10)}.doc`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -119,6 +274,10 @@ const App: React.FC = () => {
         onDeleteQuestion={handleDeleteQuestion}
         onEditQuestion={handleEditClick}
         questionStates={questionStates}
+        onExportAll={handleExportAll}
+        onBatchGenerate={handleBatchGenerate}
+        isBatchProcessing={isBatchProcessing}
+        batchProgress={batchProgress}
       />
       
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
@@ -161,6 +320,18 @@ const App: React.FC = () => {
                   question={selectedQuestion} 
                   savedEssay={getQuestionState(selectedQuestion.id).generatorEssay}
                   onSave={(essay) => updateQuestionState(selectedQuestion.id, { generatorEssay: essay })}
+                />
+              )}
+              {mode === AppMode.IMPROVER && (
+                <EssayImprover 
+                   question={selectedQuestion}
+                   modelEssay={getQuestionState(selectedQuestion.id).generatorEssay}
+                   clozeData={getQuestionState(selectedQuestion.id).clozeData}
+                   userAnswers={getQuestionState(selectedQuestion.id).clozeUserAnswers}
+                   feedback={getQuestionState(selectedQuestion.id).clozeFeedback}
+                   onSaveData={(data) => updateQuestionState(selectedQuestion.id, { clozeData: data })}
+                   onSaveProgress={(answers, fb) => updateQuestionState(selectedQuestion.id, { clozeUserAnswers: answers, clozeFeedback: fb })}
+                   onModelEssayGenerated={(essay) => updateQuestionState(selectedQuestion.id, { generatorEssay: essay })}
                 />
               )}
               {mode === AppMode.GRADER && (
