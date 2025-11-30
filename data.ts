@@ -2592,7 +2592,7 @@ Requires an assessment of the extent to which government policy can influence an
     questionNumber: "5(a)",
     topic: SyllabusTopic.MACROECONOMY,
     chapter: "4.4 Economic growth",
-    maxMarks: 7,
+    maxMarks: 8,
     questionText: "With the help of an aggregate demand and aggregate supply diagram, explain how a decrease in interest rates could cause economic growth and consider whether economic growth will always result in inflation.",
     markScheme: `Follow the point-based marking guidance at the top of this mark scheme and 
 award:
@@ -2616,5 +2616,222 @@ One mark for a valid explanation that rise in inflation assumes that the
 economy is operating at full capacity; the growth may be focused on capital 
 intensive industries (1) or that the source of the growth may be long term in 
 nature (1). The second mark is for a justified conclusion.`
+  },
+  {
+    id: "custom-1764464898995",
+    year: "2024",
+    paper: "9708/21",
+    variant: "May/June",
+    questionNumber: "2(a)",
+    topic: SyllabusTopic.BASIC_IDEAS,
+    chapter: "1.6 Classification of goods and services",
+    maxMarks: 8,
+    questionText: "With the use of examples, explain the difference between public goods \nand merit goods and consider whether markets will always provide \nenough of both goods.",
+    markScheme: `AO1 Knowledge and Understanding (max 3 marks) 
+ For the use of accurate examples of BOTH merit goods and public goods 
+(1). 
+ For clearly explaining the characteristics of public goods i.e., non-rivalry 
+and non-excludable (1). 
+ For clearly explaining the characteristics of merit goods i.e., better than 
+people realise and under consumed / underproduced due to information 
+failure (1). 
+AO2 Analysis (max 3 marks) 
+ A market economy is less likely to produce enough of both goods due to 
+the lack of a profit motive unless heavily subsidised. 
+ A mixed economy may produce enough due to government involvement 
+and the welfare motive but may be constrained by limits on government 
+spending. 
+Note: Analysis should consider at least 2 markets. If only 1 market is analysed, 
+then 2 marks maximum for analysis and 0 for evaluation. 
+AO3 Evaluation (max 2 marks) 
+Offers a valid evaluation of whether enough of both types of good can be 
+produced in at least 2 markets (1) reaching a valid conclusion (1)`
+  },
+  {
+    id: "custom-1764464986836",
+    year: "2024",
+    paper: "9708/21",
+    variant: "May/June",
+    questionNumber: "2(b)",
+    topic: SyllabusTopic.BASIC_IDEAS,
+    chapter: "1.4 Resource allocation in different economic systems",
+    maxMarks: 12,
+    questionText: "Assess whether a planned economic system should always switch to a \nmixed economy.",
+    markScheme: `AO1 Knowledge and understanding and AO2 Analysis 
+Analysis of both the potential advantages and disadvantages of a
+planned economic system including the emphasis on welfare and 
+provision of public and merit goods. However, the lack of competition may 
+mean a lack of efficient allocation of goods etc. 
+Analysis of both the potential advantages and disadvantages of a 
+mixed economy including the fact that it possibly contains the best 
+features of both a planned and a market economy, but this depends on 
+how mixed it actually is. This may also include an assessment of the ease 
+of the switch itself. 
+Level 1 responses will be assertive and lacking in explanations / mainly 
+descriptive and/or or mainly lacking in relevance to the question. 
+Level 2 responses may contain some inaccuracies and will be one sided. 
+Analysis will be explained at least in part and will be largely relevant to the 
+question. 
+Level 3 responses will consider alternative policies / concepts etc. and will 
+be balanced. Explanations of points raised will be offered and will be accurate 
+and relevant to the question. 
+AO3 Evaluation 
+For an evaluation of both the advantages and disadvantages of planned 
+and mixed economies leading to: 
+A valid conclusion.`
+  },
+  {
+    id: "custom-1764465039620",
+    year: "2024",
+    paper: "9708/21",
+    variant: "May/June",
+    questionNumber: "3(a)",
+    topic: SyllabusTopic.PRICE_SYSTEM,
+    chapter: "2.2 Price elasticity, income elasticity and cross elasticity of demand",
+    maxMarks: 8,
+    questionText: "With the help of a formula, explain what is meant by the income \nelasticity of demand for a product and consider the extent to which \ndemand for the product will always rise at the same rate as the income \nof its consumers.",
+    markScheme: `AO1 Knowledge and Understanding (max 3 marks) 
+For an accurate formula of YED (1). For clear and accurate knowledge and 
+explanation of what is meant by YED (1) including the difference between 
+elastic and inelastic YED (1). 
+AO2 Analysis (max 3 marks) 
+For a clear understanding and explanation that this depends on the coefficient 
+value of YED (1) and analysis of the different outcomes depending on whether 
+the product is normal (positive coefficient) (1) or inferior (negative coefficient) 
+(1). 
+AO3 Evaluation (max 2 marks) 
+For a considered evaluation of the possible outcomes (1) leading to a valid 
+conclusion (1).`
+  },
+  {
+    id: "custom-1764465092178",
+    year: "2024",
+    paper: "9708/21",
+    variant: "May/June",
+    questionNumber: "3(b)",
+    topic: SyllabusTopic.PRICE_SYSTEM,
+    chapter: "2.2 Price elasticity, income elasticity and cross elasticity of demand",
+    maxMarks: 12,
+    questionText: "Assess the extent to which price elasticity of supply or cross elasticity \nof demand is most useful to businesses.",
+    markScheme: `AO1 Knowledge and understanding and AO2 Analysis 
+ An assessment of the usefulness of PES e.g., it estimates how quickly a 
+business will take to respond to changes in demand, levels of stock it can 
+hold etc., but this is only an estimate and may change. 
+ An assessment of the usefulness of XED e.g., it tells the business 
+whether their product is a substitute (positive XED) or a complement 
+(negative XED) and how close the relationship is and hence its sensitivity 
+to the actions of other businesses, but the speed of change may mean it 
+is quickly out of date.AO3 Evaluation 
+ For a full evaluation of the usefulness of both measurements compared 
+with each other leading to: 
+ A valid conclusion`
+  },
+  {
+    id: "custom-1764465159719",
+    year: "2024",
+    paper: "9708/21",
+    variant: "May/June",
+    questionNumber: "4(a)",
+    topic: SyllabusTopic.MACROECONOMY,
+    chapter: "4.3 Aggregate Demand and Aggregate Supply analysis",
+    maxMarks: 8,
+    questionText: "Explain three of the components of aggregate demand and consider the \nextent to which they may be increased without leading to inflation.",
+    markScheme: `AO1 Knowledge and Understanding (max 3 marks) 
+For a clear and accurate explanation of three components of aggregate 
+demand i.e., consumer spending, investment, government spending and / or 
+net exports (1  3). 
+Note. Q4(b) lists three components of AD so any AO1 marks CANNOT be 
+awarded for simply mentioning a component.
+AO2 Analysis (max 3 marks) 
+For an analysis that explains that one cause of inflation is a situation where AD 
+rises more than AS (1) but also considers why this may or may not occur e.g., 
+the economy is operating at less than capacity, some of the increase in AD also 
+increases AS etc. 
+ (up to 2 marks) 
+Note. If both scenarios are considered, then full marks may be awarded. For 
+one-sided answers, maximum mark of 1. 
+AO3 Evaluation (max 2 marks) 
+For an answer that clearly considers both sides (1) leading to a valid 
+conclusion (1).`
+  },
+  {
+    id: "custom-1764465252243",
+    year: "2024",
+    paper: "9708/21",
+    variant: "May/June",
+    questionNumber: "4(b)",
+    topic: SyllabusTopic.GOVT_MACRO,
+    chapter: "5.2 Fiscal policy",
+    maxMarks: 12,
+    questionText: "The Chinese government has re-emphasised its commitment to \nrebalancing the economy from one focused mainly on investment and \nexports to one aiming to increase the proportion spent on domestic \nconsumption. \nAssess the extent to which it would be possible to achieve this by fiscal \npolicy alone.",
+    markScheme: `AO1 Knowledge and understanding and AO2 Analysis 
+ The analysis must focus on the usefulness of using fiscal policy to 
+rebalance the economy in the way suggested. Domestic consumption can 
+be boosted by a number of fiscal policies including policies on taxation and 
+government spending, but the main problem would be achieving this in a 
+sustainable way. 
+ This analysis must be compared with alternative policies including 
+supply-side policies and monetary policies plus fiscal policies with a 
+supply-side content.AO3 Evaluation 
+ For a full evaluation of more than one type of policy that clearly assesses 
+and compares the potential usefulness of them to rebalance the Chinese 
+economy leading to a:valid conclusion.`
+  },
+  {
+    id: "custom-1764465290183",
+    year: "2024",
+    paper: "9708/21",
+    variant: "May/June",
+    questionNumber: "5(a)",
+    topic: SyllabusTopic.MACROECONOMY,
+    chapter: "4.5 Unemployment",
+    maxMarks: 8,
+    questionText: "Explain three causes of unemployment and consider which cause is \nlikely to be most damaging to a high-income economy.",
+    markScheme: `AO1 Knowledge and Understanding (max 3 marks) 
+For a clear and accurate explanation of three causes of unemployment from 
+frictional, structural, cyclical (demand deficient), seasonal or technological 
+(31). 
+AO2 Analysis (max 3 marks) 
+Each cause identified must be analysed, and judgements made about how 
+damaging it might be for a high-income economy (31). For example, points to 
+consider may include: 
+ Frictional unemployment may be dependent on information provision. 
+ Structural unemployment may be permanent and difficult to solve. 
+ Cyclical unemployment depends on the economic cycle. 
+ Seasonal depends on alternative sources of employment. 
+ Technological depends on occupational or geographical immobility of 
+labour. 
+AO3 Evaluation (max 2 marks) 
+For an answer that clearly assesses how damaging each cause may be to a 
+high-income developed economy in comparison with each other (1) that leads 
+to a justified conclusion as to which may be the most damaging (1)`
+  },
+  {
+    id: "custom-1764465353716",
+    year: "2024",
+    paper: "9708/21",
+    variant: "May/June",
+    questionNumber: "5(b)",
+    topic: SyllabusTopic.GOVT_MACRO,
+    chapter: "5.1 Government macroeconomic policy objectives",
+    maxMarks: 10,
+    questionText: "Assess which expansionary macroeconomic policy would be most likely \nto enable a government to meet its economic objective of a low rate of \nunemployment.",
+    markScheme: `AO1 Knowledge and understanding and AO2 Analysis 
+ The analysis must focus on the advantages and disadvantages of using at 
+least two expansionary macroeconomic policies to keep unemployment 
+low. For example, one policy might be an expansionary supply-side policy 
+with an emphasis on training and education which would allow people to be 
+more employable, e.g., by having more relevant skills but it may be timeconsuming and costly. 
+ This chosen policy must then be contrasted with an alternative policy / 
+policies. For example, expansionary monetary policy may be suggested 
+with the use of low interest rates to encourage investment and boost 
+employment, but the investment may be directed towards more capitalintensive production. 
+Note. The focus of the question must be on how a low rate of unemployment 
+may be achieved.AO3 Evaluation: 
+ That clearly compares the likely success of at least two expansionary 
+macroeconomic policies that leads to: 
+ A valid conclusion as to which policy would be most likely to meet the 
+economic objective of a low rate of unemployment. 
+ Accept all valid responses.`
   }
 ];
